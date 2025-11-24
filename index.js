@@ -49,9 +49,9 @@ async function run() {
       const { name, photo, arts } = req.body;
       const existingArtist = await artistsCollection.findOne({ name });
 
-      const query={
-        name: name
-      }
+      const query = {
+        name: name,
+      };
 
       if (existingArtist) {
         const update = {
@@ -64,14 +64,14 @@ async function run() {
         };
 
         const result = await artistsCollection.updateOne(query, update);
-        res.send(result)
+        res.send(result);
       } else {
         const newArtist = {
           name,
           photo,
           total_artworks: 1,
-          arts: arts
-        }
+          arts: arts,
+        };
         const result = await artistsCollection.insertOne(newArtist);
         res.send(result);
       }
@@ -107,6 +107,17 @@ async function run() {
       res.send(result);
     });
 
+    app.get("/my-gallery", async (req, res) => {
+      const email = req.query.email;
+      const query = {};
+      if (email) {
+        query.user_email = email;
+      }
+      const cursor = artworksCollection.find(query);
+      const result = await cursor.toArray();
+      res.send(result);
+    });
+
     app.get("/artworks/artist/:id", async (req, res) => {
       const id = req.params.id;
 
@@ -132,11 +143,43 @@ async function run() {
       res.send(result);
     });
 
-    app.post("/favorites/:id", async (req, res) => {
+    app.put("/artworks/:id", async (req, res) => {
+      const id = req.params.id;
+      const data = req.body;
+      const query = { _id: new ObjectId(id) };
+      const update = {
+        $set: data,
+      };
+      const result = await artworksCollection.updateOne(query, update);
+      res.send(result);
+    });
+
+    app.delete('/artworks/:id', async(req, res) => {
+      const id = req.params.id 
+      const query = {_id: new ObjectId(id)}
+      const result = await artworksCollection.deleteOne(query)
+      res.send(result)
+    })
+
+    app.get('/favorites', async(req, res) => {
+      const cursor = favoritesCollection.find()
+      const result = await cursor.toArray()
+      res.send(result)
+    })
+
+    app.post("/favorites", async (req, res) => {
       const data = req.body;
       const results = await favoritesCollection.insertOne(data);
       res.send(results);
     });
+
+    app.delete('/favorites/:id', async(req, res) => {
+      const id = req.params.id 
+      const query = {_id: new ObjectId(id)}
+      const result = await artworksCollection.deleteOne(query)
+      res.send(result)
+    })
+
 
     // Send a ping to confirm a successful connection
     await client.db("admin").command({ ping: 1 });
