@@ -190,7 +190,12 @@ async function run() {
     })
 
     app.get('/favorites', async(req, res) => {
-      const cursor = favoritesCollection.find()
+      const email = req.query.email;
+      const query = {};
+      if (email) {
+        query.user_email = email;
+      }
+      const cursor = favoritesCollection.find(query)
       const result = await cursor.toArray()
       res.send(result)
     })
