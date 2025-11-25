@@ -1,17 +1,16 @@
 const express = require("express");
 const app = express();
 const cors = require("cors");
+require("dotenv").config()
 const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
 const port = process.env.PORT || 3000;
 
 app.use(cors());
 app.use(express.json());
 
-// artwork-db
-// quVjmbYw314n2jdR
 
 const uri =
-  "mongodb+srv://artwork-db:quVjmbYw314n2jdR@cluster0.enlhfah.mongodb.net/?appName=Cluster0";
+  `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.enlhfah.mongodb.net/?appName=Cluster0`;
 
 const client = new MongoClient(uri, {
   serverApi: {
@@ -23,7 +22,7 @@ const client = new MongoClient(uri, {
 
 async function run() {
   try {
-    await client.connect();
+    // await client.connect();
 
     const db = client.db("artwork-db");
     const artworksCollection = db.collection("artworks");
@@ -211,7 +210,7 @@ async function run() {
 
 
     // Send a ping to confirm a successful connection
-    await client.db("admin").command({ ping: 1 });
+    // await client.db("admin").command({ ping: 1 });
     console.log(
       "Pinged your deployment. You successfully connected to MongoDB!"
     );
