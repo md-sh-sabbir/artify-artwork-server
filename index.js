@@ -30,10 +30,31 @@ async function run() {
     const artistsCollection = db.collection("artists");
     const favoritesCollection = db.collection("favorites");
 
-    app.get("/artworks", async (req, res) => {
+    app.get('/artworks', async(req, res) => {
+      const query = {visibility: "public"}
+      const cursor = artworksCollection.find(query)
+      const result = await cursor.toArray()
+      res.send(result)
+    })
+
+    app.get("/filter", async (req, res) => {
+      const {category, search} = req.query 
+
       const query = {
         visibility: "public",
       };
+
+      if(category && category !== "all"){
+        query.category = category;
+      }
+
+      if(search){
+        query.title = {
+          $regex: search,
+          $options: "i"
+        }
+      }
+      
       const cursor = artworksCollection.find(query);
       const result = await cursor.toArray();
       res.send(result);
@@ -44,6 +65,12 @@ async function run() {
       const result = await artworksCollection.insertOne(data);
       res.send(result);
     });
+
+    app.get('/artists', async(req, res) => {
+      const cursor = artistsCollection.find()
+      const result = await cursor.toArray()
+      res.send(result)
+    })
 
     app.post("/artists", async (req, res) => {
       const { name, photo, arts } = req.body;
@@ -88,7 +115,9 @@ async function run() {
 
     app.get("/search", async (req, res) => {
       const search_text = req.query.search;
-      const query = {};
+      const query = {
+        visibility: "public",
+      };
       if (search_text) {
         query.title = {
           $regex: search_text,
